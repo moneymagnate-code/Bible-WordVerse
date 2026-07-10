@@ -1,0 +1,6 @@
+{
+  "name": "Bible WordVerse",
+  "description": "A daily Christian WordVerse word-guessing game featuring daily biblical words, verses, and devotions for the Sozique Christian Network.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
