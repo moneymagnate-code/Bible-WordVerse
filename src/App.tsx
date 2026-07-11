@@ -67,7 +67,7 @@ export default function App() {
 
   // Load stats from local storage on startup
   useEffect(() => {
-    const savedStats = localStorage.getItem('bible_wordle_stats_v1');
+    const savedStats = localStorage.getItem('bible_wordverse_stats_v2') || localStorage.getItem('bible_wordle_stats_v1');
     if (savedStats) {
       try {
         setStats(JSON.parse(savedStats));
@@ -79,7 +79,7 @@ export default function App() {
       setIsHelpOpen(true);
     }
 
-    const savedCompleted = localStorage.getItem('bible_wordle_completed_challenge_levels_v1');
+    const savedCompleted = localStorage.getItem('bible_wordverse_completed_challenge_levels_v2') || localStorage.getItem('bible_wordle_completed_challenge_levels_v1');
     if (savedCompleted) {
       try {
         setCompletedChallengeLevels(JSON.parse(savedCompleted));
@@ -92,7 +92,7 @@ export default function App() {
   // Sync game state depending on whether it's Today's Daily, Archive, or Challenge play
   useEffect(() => {
     if (isChallengePlay) {
-      const savedChallenge = localStorage.getItem(`bible_wordle_challenge_state_level_${challengeLevel}`);
+      const savedChallenge = localStorage.getItem(`bible_wordverse_challenge_state_level_${challengeLevel}`) || localStorage.getItem(`bible_wordle_challenge_state_level_${challengeLevel}`);
       if (savedChallenge) {
         try {
           setGameState(JSON.parse(savedChallenge));
@@ -109,7 +109,7 @@ export default function App() {
         });
       }
     } else if (isArchivePlay) {
-      const savedArchive = localStorage.getItem(`bible_wordle_archive_${activeDate}`);
+      const savedArchive = localStorage.getItem(`bible_wordverse_archive_${activeDate}`) || localStorage.getItem(`bible_wordle_archive_${activeDate}`);
       if (savedArchive) {
         try {
           setGameState(JSON.parse(savedArchive));
@@ -128,7 +128,7 @@ export default function App() {
         });
       }
     } else {
-      const savedDaily = localStorage.getItem('bible_wordle_daily_state_v1');
+      const savedDaily = localStorage.getItem('bible_wordverse_daily_state_v2') || localStorage.getItem('bible_wordle_daily_state_v1');
       if (savedDaily) {
         try {
           const parsed = JSON.parse(savedDaily);
@@ -197,7 +197,7 @@ export default function App() {
   // Save specific stats helper
   const saveStats = (updatedStats: UserStats) => {
     setStats(updatedStats);
-    localStorage.setItem('bible_wordle_stats_v1', JSON.stringify(updatedStats));
+    localStorage.setItem('bible_wordverse_stats_v2', JSON.stringify(updatedStats));
   };
 
   // Keyboard updates: Word submission (enter)
@@ -236,29 +236,33 @@ export default function App() {
     // Update Game State Local Persistence
     setGameState(updatedState);
     if (isChallengePlay) {
-      localStorage.setItem(`bible_wordle_challenge_state_level_${challengeLevel}`, JSON.stringify(updatedState));
+      localStorage.setItem(`bible_wordverse_challenge_state_level_${challengeLevel}`, JSON.stringify(updatedState));
       
       // Update unlocked/completed challenge levels list on win
       if (isWin && !completedChallengeLevels.includes(challengeLevel)) {
         const updatedCompleted = [...completedChallengeLevels, challengeLevel].sort((a, b) => a - b);
         setCompletedChallengeLevels(updatedCompleted);
-        localStorage.setItem('bible_wordle_completed_challenge_levels_v1', JSON.stringify(updatedCompleted));
+        localStorage.setItem('bible_wordverse_completed_challenge_levels_v2', JSON.stringify(updatedCompleted));
       }
     } else if (isArchivePlay) {
-      localStorage.setItem(`bible_wordle_archive_${activeDate}`, JSON.stringify(updatedState));
+      localStorage.setItem(`bible_wordverse_archive_${activeDate}`, JSON.stringify(updatedState));
     } else {
-      localStorage.setItem('bible_wordle_daily_state_v1', JSON.stringify(updatedState));
+      localStorage.setItem('bible_wordverse_daily_state_v2', JSON.stringify(updatedState));
     }
 
     // Process general User Stats only when they finish a game for the FIRST TIME
     if (isGameOver) {
       const trackingKey = isChallengePlay ? `challenge-${challengeLevel}` : activeDate;
-      const alreadyPlayedDates = JSON.parse(localStorage.getItem('bible_wordle_completed_dates_v1') || '[]');
+      const alreadyPlayedDates = JSON.parse(
+        localStorage.getItem('bible_wordverse_completed_dates_v2') || 
+        localStorage.getItem('bible_wordle_completed_dates_v1') || 
+        '[]'
+      );
       
       if (!alreadyPlayedDates.includes(trackingKey)) {
         // Record completed date/level
         alreadyPlayedDates.push(trackingKey);
-        localStorage.setItem('bible_wordle_completed_dates_v1', JSON.stringify(alreadyPlayedDates));
+        localStorage.setItem('bible_wordverse_completed_dates_v2', JSON.stringify(alreadyPlayedDates));
 
         // For Archive and Challenge play, we only increment overall played/won stats but do not build Daily Streak
         const playedCount = stats.gamesPlayed + 1;
@@ -338,7 +342,11 @@ export default function App() {
   };
 
   // Fetch completed dates list for the archive checklists
-  const completedDates = JSON.parse(localStorage.getItem('bible_wordle_completed_dates_v1') || '[]');
+  const completedDates = JSON.parse(
+    localStorage.getItem('bible_wordverse_completed_dates_v2') || 
+    localStorage.getItem('bible_wordle_completed_dates_v1') || 
+    '[]'
+  );
 
   // Generate mapping of letter colors for keyboard
   const keyboardLetterStates = getKeyboardLetterStates(gameState.guesses, solution);
@@ -409,9 +417,11 @@ export default function App() {
               onClick={() => {
                 if (window.confirm("Are you sure you want to reset your 7-Level Challenge progress?")) {
                   setCompletedChallengeLevels([]);
+                  localStorage.removeItem('bible_wordverse_completed_challenge_levels_v2');
                   localStorage.removeItem('bible_wordle_completed_challenge_levels_v1');
                   // Also reset challenge state cache
                   for (let i = 1; i <= 7; i++) {
+                    localStorage.removeItem(`bible_wordverse_challenge_state_level_${i}`);
                     localStorage.removeItem(`bible_wordle_challenge_state_level_${i}`);
                   }
                   setChallengeLevel(1);
