@@ -1,71 +1,47 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Header } from './components/Header'
 import { GameBoard } from './components/GameBoard'
-import { Keyboard } from './components/Keyboard'
+import { Keyboard } from './components.Keyboard'
 import { HelpModal } from './components/HelpModal'
 import { StatsModal } from './components/StatsModal'
 import { ArchiveModal } from './components/ArchiveModal'
 import { createEmptyBoard, evaluateGuess } from './utils'
 import { getTodayPuzzle } from './words'
-import type { DailyPuzzle, GuessRow, LetterState } from './types'
+import type { GuessRow, LetterState } from './types'
 
 const MAX_ROWS = 6
 const WORD_LENGTH = 5
 
 const App: React.FC = () => {
-  const [puzzle, setPuzzle] = useState<DailyPuzzle | null>(null)
+  const puzzle = getTodayPuzzle()
   const [board, setBoard] = useState<GuessRow[]>(() => createEmptyBoard(MAX_ROWS, WORD_LENGTH))
   const [currentRow, setCurrentRow] = useState(0)
   const [currentGuess, setCurrentGuess] = useState('')
   const [isSolved, setIsSolved] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
   const [showHelp, setShowHelp] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
 
-  useEffect(() => {
-    async function loadPuzzle() {
-      try {
-        setIsLoading(true)
-        setError(null)
-        const todayPuzzle = await getTodayPuzzle()
-        setPuzzle(todayPuzzle)
-      } catch (e) {
-        console.error(e)
-        setError('Unable to load today’s WordVerse. Please try again later.')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadPuzzle()
-  }, [])
-
   function handleKey(letter: string) {
-    if (!puzzle || isSolved || isLoading) return
+    if (isSolved) return
     if (currentGuess.length >= WORD_LENGTH) return
-
-    const nextGuess = (currentGuess + letter).toUpperCase()
-    setCurrentGuess(nextGuess)
-
+    setCurrentGuess(prev => prev + letter)
     setBoard(prev => {
       const copy = prev.map(row => ({ tiles: row.tiles.map(t => ({ ...t })) }))
-      nextGuess.split('').forEach((ch, idx) => {
+      currentGuess.split('').forEach((ch, idx) => {
         copy[currentRow].tiles[idx].letter = ch
       })
+      const nextIndex = currentGuess.length
+      if (nextIndex < WORD_LENGTH) {
+        copy[currentRow].tiles[nextIndex].letter = letter
+      }
       return copy
     })
   }
 
   function handleBackspace() {
-    if (!puzzle || isSolved || isLoading) return
-    if (!currentGuess.length) return
-
-    const nextGuess = currentGuess.slice(0, -1)
-    setCurrentGuess(nextGuess)
-
+    if (!currentGuess.length || isSolved) return
+    setCurrentGuess(prev => prev.slice(0, -1))
     setBoard(prev => {
       const copy = prev.map(row => ({ tiles: row.tiles.map(t => ({ ...t })) }))
       const idx = currentGuess.length - 1
@@ -77,7 +53,7 @@ const App: React.FC = () => {
   }
 
   function handleEnter() {
-    if (!puzzle || isSolved || isLoading) return
+    if (isSolved) return
     if (currentGuess.length !== WORD_LENGTH) return
 
     const guess = currentGuess.toUpperCase()
@@ -109,40 +85,26 @@ const App: React.FC = () => {
           onArchive={() => setShowArchive(true)}
         />
 
-        {isLoading && (
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-soft)' }}>
-            Loading today&apos;s WordVerse…
-          </p>
-        )}
+        <div className="game-layout">
+          <div>
+            <GameBoard board={board} />
+            <Keyboard
+              onKey={handleKey}
+              onEnter={handleEnter}
+              onBackspace={handleBackspace}
+            />
+          </div>
 
-        {error && (
-          <p style={{ fontSize: '0.9rem', color: 'var(--error)' }}>
-            {error}
-          </p>
-        )}
-
-        {puzzle && !isLoading && !error && (
-          <div className="game-layout">
-            <div>
-              <GameBoard board={board} />
-              <Keyboard
-                onKey={handleKey}
-                onEnter={handleEnter}
-                onBackspace={handleBackspace}
-              />
-            </div>
-
-            <div className="scripture-card">
-              <div className="scripture-label">Today&apos;s WordVerse</div>
-              <div className="scripture-reference">{puzzle.scripture.reference}</div>
-              <div className="scripture-text">
-                {isSolved
-                  ? puzzle.scripture.text
-                  : 'Solve today’s word to reveal the full verse and reflection.'}
-              </div>
+          <div className="scripture-card">
+            <div className="scripture-label">Today&apos;s WordVerse</div>
+            <div className="scripture-reference">{puzzle.scripture.reference}</div>
+            <div className="scripture-text">
+              {isSolved
+                ? puzzle.scripture.text
+                : 'Solve today’s word to reveal the full verse and reflection.'}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
@@ -153,4 +115,3 @@ const App: React.FC = () => {
 }
 
 export default App
-
