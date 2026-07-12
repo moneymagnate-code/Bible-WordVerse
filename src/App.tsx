@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Header } from './components/Header'
 import { GameBoard } from './components/GameBoard'
-import { Keyboard } from './components.Keyboard'
+import { Keyboard } from './components/Keyboard'
 import { HelpModal } from './components/HelpModal'
 import { StatsModal } from './components/StatsModal'
 import { ArchiveModal } from './components/ArchiveModal'
