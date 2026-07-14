@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Bible-WordVerse/',
+  base: '/Bible-WordVerse/', // 👈 critical for GitHub Pages
 })
