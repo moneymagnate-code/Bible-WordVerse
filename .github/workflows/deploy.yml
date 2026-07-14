@@ -2,9 +2,8 @@ name: Deploy Vite site to GitHub Pages
 
 on:
   push:
-branches: ["main"]
+branches: ["Bible-WordVerse"]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
