@@ -2,7 +2,7 @@ name: Deploy Vite site to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"]     # ← FIXED: build the branch where your code actually lives
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22   # ← FIXED
+          node-version: 22   # ← FIXED: Node 20 is deprecated
 
       - name: Install dependencies
         run: npm install
