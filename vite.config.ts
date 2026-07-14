@@ -2,6 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  base: '/Bible-WordVerse/',
   plugins: [react()],
-  base: '/Bible-WordVerse/', // 👈 MUST match your repo name exactly
 })
