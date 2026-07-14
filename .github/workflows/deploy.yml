@@ -2,7 +2,8 @@ name: Deploy Vite site to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
 
 jobs:
   build:
@@ -31,11 +32,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      contents: read      # ← REQUIRED to avoid deprecated artifact system
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
