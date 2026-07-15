@@ -1,4 +1,4 @@
-import type { DailyPuzzle } from './types'
+import type { DailyPuzzle } from './src/types'
 
 //
 // 1. A list of daily verse references.
