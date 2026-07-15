@@ -1,4 +1,4 @@
-import type { GuessRow, LetterState } from './types'
+import type { GuessRow, LetterState } from './src/types'
 
 export function createEmptyBoard(rows = 6, cols = 5): GuessRow[] {
   return Array.from({ length: rows }, () => ({
